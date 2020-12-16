@@ -5,8 +5,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp();
 
-// Take the text parameter passed to this HTTP endpoint and insert it into
-// Cloud Firestore under the path /messages/:documentId/original
+
 exports.active_logs = functions.https.onRequest(async (req, res) => {
     if (req.method !== 'POST') {
         res.status(405).send('Method Not Allowed');
@@ -30,7 +29,7 @@ exports.active_logs = functions.https.onRequest(async (req, res) => {
     res.status(200).send(writeResult.id);
   });
 
-exports.get_active_logs = functions.https.onRequest(async (req, res) => {
+exports.get_all_active_logs = functions.https.onRequest(async (req, res) => {
     const response = [];
     const writeResult = await admin.firestore().collection('active_logs').get().then(function(querySnapshot) {
         querySnapshot.forEach(function(doc) {
@@ -41,6 +40,24 @@ exports.get_active_logs = functions.https.onRequest(async (req, res) => {
         return
     });
 
+    res.status(200).send(response);
+  });
+
+exports.get_active_logs = functions.https.onRequest(async (req, res) => {
+    const response = [];
+    const writeResult = await admin.firestore()
+                                   .collection('active_logs')
+                                   .orderBy("created_at", "desc")
+                                   .limit(20)
+                                   .get()
+                                   .then(function(querySnapshot) {
+        querySnapshot.forEach(function(doc) {
+            response.push(doc.data());
+        });
+    }).catch(function(error) {
+        res.status(400).send(error);
+        return
+    });
     res.status(200).send(response);
   });
 
