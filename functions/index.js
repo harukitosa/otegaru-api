@@ -61,7 +61,8 @@ exports.get_active_logs = functions.https.onRequest(async (req, res) => {
     res.status(200).send(response);
   });
 
-exports.get_time = functions.https.onRequest((req, res) => {
+
+exports.get_time = functions.region('asia-northeast1').https.onRequest((req, res) => {
     const now = Date.now();
     res.status(200).send({time:now});
   });
